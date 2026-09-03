@@ -52,7 +52,7 @@
   /* ---------- Typewriter headline ---------- */
   const twEl = document.getElementById('tw');
   const BR = '\u0001', EM_S = '\u0002', EM_E = '\u0003';
-  const fullText = 'CRÉE POUR ÊTRE VU, RESPECTÉ ET CHOISI.';
+  const fullText = 'DES IDÉES BRUTES, DES RENDUS QUI \u0002CLAQUENT\u0003.';
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function renderTyped(n){
