@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panier — Boutique Caleb Creative</title>
+<link rel="stylesheet" href="assets/shop.css">
+</head>
+<body>
+
+<header class="shop-header">
+  <div class="shop-header-row">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <nav class="shop-nav">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html">Catalogue</a>
+      <a href="catalogue.html?cat=ia">Intelligence artificielle</a>
+      <a href="catalogue.html?cat=logiciels">Logiciels créatifs</a>
+    </nav>
+    <div class="shop-actions">
+      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <button class="shop-icon-btn mobile-nav-btn" data-mobile-nav-open aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+        <span class="cart-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav">
+  <div class="mobile-nav-top">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <button class="mobile-nav-close" data-mobile-nav-close aria-label="Fermer le menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <a href="index.html">Accueil</a>
+  <a href="catalogue.html">Catalogue</a>
+  <a href="panier.html">Panier</a>
+  <a href="../index.html">← Retour au portfolio</a>
+</div>
+
+<main class="wrap">
+  <div class="section" style="padding-top:32px;">
+    <div class="eyebrow">PANIER</div>
+    <h1 style="font-size:clamp(1.7rem,4vw,2.2rem); margin:0 0 20px;">Ton panier</h1>
+
+    <div id="cartFilled">
+      <div class="cart-layout">
+        <div id="cartLines"></div>
+        <aside class="summary-card">
+          <div class="summary-row"><span>Sous-total</span><span id="sumSubtotal">0 FCFA</span></div>
+          <div class="summary-row"><span>Livraison</span><span>Numérique — gratuite</span></div>
+          <div class="summary-row total"><span>Total</span><span id="sumTotal">0 FCFA</span></div>
+          <a href="commande.html" class="btn btn-primary btn-full" style="margin-top:18px;" id="checkoutBtn">
+            Passer commande
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="catalogue.html" class="btn btn-outline btn-full" style="margin-top:10px;">Continuer mes achats</a>
+        </aside>
+      </div>
+    </div>
+
+    <div class="empty-cart" id="cartEmpty" style="display:none;">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg></div>
+      <p>Ton panier est vide pour le moment.</p>
+      <a href="catalogue.html" class="btn btn-dark">Découvrir le catalogue</a>
+    </div>
+  </div>
+</main>
+
+<footer class="shop-footer">
+  <div class="wrap shop-footer-row">
+    <span>© 2026 Caleb Creative — Boutique</span>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+  </div>
+</footer>
+
+<script src="assets/products.js"></script>
+<script src="assets/cart.js"></script>
+<script src="assets/shop.js"></script>
+<script>
+  const cartFilled = document.getElementById('cartFilled');
+  const cartEmpty = document.getElementById('cartEmpty');
+  const cartLines = document.getElementById('cartLines');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  function renderCart(){
+    const lines = cartDetails();
+    if (!lines.length){
+      cartFilled.style.display = 'none';
+      cartEmpty.style.display = 'block';
+      return;
+    }
+    cartFilled.style.display = 'block';
+    cartEmpty.style.display = 'none';
+
+    cartLines.innerHTML = lines.map(line => `
+      <div class="cart-line" data-product="${line.productId}" data-plan="${line.planId}">
+        <div class="cart-line-avatar" style="background:${line.gradient}"><span>${line.avatar}</span></div>
+        <div class="cart-line-info">
+          <div class="cart-line-name">${line.name}</div>
+          <div class="cart-line-plan">${line.planLabel} · ${shopFormatPrice(line.unitPrice)}</div>
+        </div>
+        <div class="cart-line-qty">
+          <button type="button" data-action="minus">−</button>
+          <span>${line.qty}</span>
+          <button type="button" data-action="plus">+</button>
+        </div>
+        <div class="cart-line-price">${shopFormatPrice(line.lineTotal)}</div>
+        <button class="cart-line-remove" data-action="remove" aria-label="Retirer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    `).join('');
+
+    const total = cartTotal();
+    document.getElementById('sumSubtotal').textContent = shopFormatPrice(total);
+    document.getElementById('sumTotal').textContent = shopFormatPrice(total);
+
+    cartLines.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lineEl = btn.closest('.cart-line');
+        const productId = lineEl.dataset.product;
+        const planId = lineEl.dataset.plan;
+        const current = cartRead().find(it => it.productId === productId && it.planId === planId);
+        if (!current) return;
+        if (btn.dataset.action === 'plus') cartUpdateQty(productId, planId, current.qty + 1);
+        if (btn.dataset.action === 'minus') cartUpdateQty(productId, planId, current.qty - 1);
+        if (btn.dataset.action === 'remove') cartRemove(productId, planId);
+        renderCart();
+      });
+    });
+  }
+
+  renderCart();
+</script>
+</body>
+</html>

@@ -1,3 +1,13 @@
+  /* ---------- Lien vers la boutique (URL facilement modifiable) ---------- */
+  // Par défaut : la boutique vit dans le même dépôt, sous /boutique/.
+  // Si tu déploies la boutique séparément (sous-domaine ou autre repo),
+  // remplace simplement cette valeur par l'URL complète, ex. :
+  // const SHOP_URL = 'https://boutique.calebcreative.com/';
+  const SHOP_URL = './boutique/index.html';
+  document.querySelectorAll('[data-shop-link]').forEach(link => {
+    link.setAttribute('href', SHOP_URL);
+  });
+
   /* ---------- Theme toggle (dark / light) ---------- */
   const themeBtn = document.getElementById('themeBtn');
   const themeIcon = document.getElementById('themeIcon');
@@ -42,7 +52,7 @@
   /* ---------- Typewriter headline ---------- */
   const twEl = document.getElementById('tw');
   const BR = '\u0001', EM_S = '\u0002', EM_E = '\u0003';
-  const fullText = 'Des idées brutes.' + BR + 'Des rendus qui ' + EM_S + 'claquent.' + EM_E;
+  const fullText = 'CRÉE POUR ÊTRE VU, RESPECTÉ ET CHOISI.';
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function renderTyped(n){
@@ -125,23 +135,42 @@
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
   revealTargets.forEach(el => io.observe(el));
 
-  /* ---------- Stat count-up ---------- */
+  /* ---------- Compteurs animés (système réutilisable) ---------- */
+  function animateCounter(el, { minDuration = 900, maxDuration = 1800 } = {}){
+    const target = parseInt(el.dataset.count, 10);
+    if (!Number.isFinite(target)) return;
+
+    // Respecte la préférence de mouvement réduit : valeur finale quasi immédiate
+    if (prefersReduced){
+      el.textContent = target;
+      return;
+    }
+
+    // Durée proportionnelle à l'ampleur du nombre, bornée pour rester agréable (~0.9s à 1.8s)
+    const duration = Math.min(maxDuration, Math.max(minDuration, 500 + target * 9));
+    const start = performance.now();
+    let raf = null;
+
+    function tick(now){
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic : accélère puis ralentit naturellement
+      const value = Math.min(target, Math.round(eased * target));
+      el.textContent = value;
+      if (p < 1){
+        raf = requestAnimationFrame(tick);
+      } else {
+        el.textContent = target; // ne jamais dépasser / toujours finir pile sur la valeur
+      }
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
   const counters = document.querySelectorAll('.num');
   const counterIO = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
-      const el = entry.target;
-      const target = parseInt(el.dataset.count, 10);
-      const duration = 1100;
-      const start = performance.now();
-      function tick(now){
-        const p = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(eased * target);
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-      counterIO.unobserve(el);
+      animateCounter(entry.target);
+      counterIO.unobserve(entry.target); // ne se déclenche qu'une seule fois par compteur
     });
   }, { threshold: 0.6 });
   counters.forEach(el => counterIO.observe(el));

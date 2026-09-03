@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commande — Boutique Caleb Creative</title>
+<link rel="stylesheet" href="assets/shop.css">
+</head>
+<body>
+
+<header class="shop-header">
+  <div class="shop-header-row">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <nav class="shop-nav">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html">Catalogue</a>
+    </nav>
+    <div class="shop-actions">
+      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+        <span class="cart-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="section" style="padding-top:32px;">
+    <div class="eyebrow">COMMANDE</div>
+    <h1 style="font-size:clamp(1.7rem,4vw,2.2rem); margin:0 0 8px;">Finaliser ma commande</h1>
+    <p style="color:var(--ink-dim); max-width:56ch; margin:0 0 6px;">Renseigne tes informations : tu recevras un récapitulatif avec une référence de commande, à confirmer ensuite sur WhatsApp pour le paiement et l'activation.</p>
+  </div>
+
+  <div id="checkoutFilled">
+    <form class="checkout-layout" id="checkoutForm">
+      <div class="form-card">
+        <h2 style="font-size:16px; margin:0 0 16px;">Tes informations</h2>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="fname">Nom complet</label>
+            <input type="text" id="fname" name="fname" placeholder="Ton nom" required>
+          </div>
+          <div class="form-group">
+            <label for="fcontact">WhatsApp ou téléphone</label>
+            <input type="tel" id="fcontact" name="fcontact" placeholder="+229 ..." required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="femail">Email (optionnel)</label>
+          <input type="email" id="femail" name="femail" placeholder="vous@exemple.com">
+        </div>
+        <div class="form-group">
+          <label for="fnote">Note pour la commande (optionnel)</label>
+          <textarea id="fnote" name="fnote" rows="3" placeholder="Précisions utiles pour l'activation…"></textarea>
+        </div>
+
+        <h2 style="font-size:16px; margin:22px 0 14px;">Méthode de paiement</h2>
+        <div class="pay-method" id="payMethod">
+          <label class="pay-option selected" data-pay="mtn">
+            <input type="radio" name="pay" value="mtn" checked> Mobile Money — MTN
+          </label>
+          <label class="pay-option" data-pay="moov">
+            <input type="radio" name="pay" value="moov"> Mobile Money — Moov
+          </label>
+          <label class="pay-option" data-pay="virement">
+            <input type="radio" name="pay" value="virement"> Virement bancaire
+          </label>
+        </div>
+        <p class="pay-note">Aucun paiement n'est prélevé automatiquement ici. Après validation, tu recevras les coordonnées de paiement par WhatsApp — un acompte est demandé au démarrage, le solde à la livraison, comme précisé dans la FAQ du portfolio.</p>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top:22px;">
+          Confirmer la commande
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <aside class="summary-card">
+        <h2 style="font-size:15px; margin:0 0 14px;">Récapitulatif</h2>
+        <div id="recapLines"></div>
+        <div class="summary-row total"><span>Total</span><span id="recapTotal">0 FCFA</span></div>
+      </aside>
+    </form>
+  </div>
+
+  <div class="empty-cart" id="checkoutEmpty" style="display:none;">
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg></div>
+    <p>Ton panier est vide — ajoute un produit avant de passer commande.</p>
+    <a href="catalogue.html" class="btn btn-dark">Découvrir le catalogue</a>
+  </div>
+</main>
+
+<footer class="shop-footer">
+  <div class="wrap shop-footer-row">
+    <span>© 2026 Caleb Creative — Boutique</span>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+  </div>
+</footer>
+
+<script src="assets/products.js"></script>
+<script src="assets/cart.js"></script>
+<script src="assets/shop.js"></script>
+<script>
+  const lines = cartDetails();
+  const checkoutFilled = document.getElementById('checkoutFilled');
+  const checkoutEmpty = document.getElementById('checkoutEmpty');
+
+  if (!lines.length){
+    checkoutFilled.style.display = 'none';
+    checkoutEmpty.style.display = 'block';
+  } else {
+    document.getElementById('recapLines').innerHTML = lines.map(line => `
+      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+    `).join('');
+    document.getElementById('recapTotal').textContent = shopFormatPrice(cartTotal());
+
+    document.querySelectorAll('.pay-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input').checked = true;
+      });
+    });
+
+    document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fname = document.getElementById('fname').value.trim();
+      const fcontact = document.getElementById('fcontact').value.trim();
+      const femail = document.getElementById('femail').value.trim();
+      const fnote = document.getElementById('fnote').value.trim();
+      const pay = document.querySelector('input[name="pay"]:checked').value;
+      const payLabels = { mtn: 'Mobile Money — MTN', moov: 'Mobile Money — Moov', virement: 'Virement bancaire' };
+
+      const ref = 'CC-' + Date.now().toString(36).toUpperCase();
+      const order = {
+        ref,
+        date: new Date().toISOString(),
+        customer: { name: fname, contact: fcontact, email: femail, note: fnote },
+        payMethod: payLabels[pay],
+        items: lines,
+        total: cartTotal(),
+      };
+
+      try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order)); } catch (e) {}
+      cartClear();
+      window.location.href = 'confirmation.html';
+    });
+  }
+</script>
+</body>
+</html>

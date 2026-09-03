@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commande enregistrée — Boutique Caleb Creative</title>
+<link rel="stylesheet" href="assets/shop.css">
+</head>
+<body>
+
+<header class="shop-header">
+  <div class="shop-header-row">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <nav class="shop-nav">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html">Catalogue</a>
+    </nav>
+    <div class="shop-actions">
+      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+        <span class="cart-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="confirmFilled" class="confirm-wrap" style="display:none;">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5L20 7"/></svg>
+    </div>
+    <h1 style="font-size:clamp(1.6rem,4vw,2.1rem); margin:0 0 8px;">Commande enregistrée</h1>
+    <p style="color:var(--ink-dim);">Merci <span id="confirmName"></span> ! Voici le récapitulatif de ta commande.</p>
+    <div class="confirm-ref">Référence : <strong id="confirmRef"></strong></div>
+
+    <div class="confirm-summary">
+      <div id="confirmLines"></div>
+      <div class="summary-row total"><span>Total</span><span id="confirmTotal"></span></div>
+      <div class="summary-row"><span>Méthode de paiement</span><span id="confirmPay"></span></div>
+    </div>
+
+    <p style="color:var(--ink-dim); font-size:14px; margin-bottom:22px;">
+      Dernière étape : écris à Caleb sur WhatsApp en mentionnant ta référence de commande pour recevoir les coordonnées de paiement et activer ton produit.
+    </p>
+
+    <div class="shop-hero-cta">
+      <a id="whatsappBtn" class="btn btn-primary" target="_blank" rel="noopener">
+        Finaliser sur WhatsApp
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="../index.html" class="btn btn-outline">Retour au portfolio</a>
+    </div>
+  </div>
+
+  <div id="confirmEmpty" class="confirm-wrap" style="display:none;">
+    <h1 style="font-size:1.6rem;">Aucune commande récente</h1>
+    <p style="color:var(--ink-dim); margin-bottom:22px;">Nous n'avons pas trouvé de commande à afficher.</p>
+    <a href="catalogue.html" class="btn btn-dark">Découvrir le catalogue</a>
+  </div>
+</main>
+
+<footer class="shop-footer">
+  <div class="wrap shop-footer-row">
+    <span>© 2026 Caleb Creative — Boutique</span>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+  </div>
+</footer>
+
+<script src="assets/products.js"></script>
+<script src="assets/cart.js"></script>
+<script src="assets/shop.js"></script>
+<script>
+  const WHATSAPP_NUMBER = '2290148135395'; // même numéro que le portfolio — modifiable ici si besoin
+
+  let order = null;
+  try { order = JSON.parse(localStorage.getItem(LAST_ORDER_KEY)); } catch (e) {}
+
+  const filled = document.getElementById('confirmFilled');
+  const empty = document.getElementById('confirmEmpty');
+
+  if (!order || !order.ref){
+    empty.style.display = 'block';
+  } else {
+    filled.style.display = 'block';
+    document.getElementById('confirmName').textContent = order.customer.name || '';
+    document.getElementById('confirmRef').textContent = order.ref;
+    document.getElementById('confirmTotal').textContent = shopFormatPrice(order.total);
+    document.getElementById('confirmPay').textContent = order.payMethod;
+    document.getElementById('confirmLines').innerHTML = order.items.map(line => `
+      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+    `).join('');
+
+    const itemsText = order.items.map(line => `- ${line.name} (${line.planLabel}) x${line.qty} — ${shopFormatPrice(line.lineTotal)}`).join('%0A');
+    const message =
+      `Bonjour Caleb, je viens de passer une commande sur la boutique (réf. ${order.ref}).%0A%0A` +
+      `${itemsText}%0A%0A` +
+      `Total : ${shopFormatPrice(order.total)}%0A` +
+      `Paiement souhaité : ${order.payMethod}%0A` +
+      `Nom : ${order.customer.name}`;
+
+    document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  }
+</script>
+</body>
+</html>

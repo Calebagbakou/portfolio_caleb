@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catalogue — Boutique Caleb Creative</title>
+<link rel="stylesheet" href="assets/shop.css">
+</head>
+<body>
+
+<header class="shop-header">
+  <div class="shop-header-row">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <nav class="shop-nav">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html" class="active">Catalogue</a>
+      <a href="catalogue.html?cat=ia">Intelligence artificielle</a>
+      <a href="catalogue.html?cat=logiciels">Logiciels créatifs</a>
+    </nav>
+    <div class="shop-actions">
+      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <button class="shop-icon-btn mobile-nav-btn" data-mobile-nav-open aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+        <span class="cart-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav">
+  <div class="mobile-nav-top">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <button class="mobile-nav-close" data-mobile-nav-close aria-label="Fermer le menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <a href="index.html">Accueil</a>
+  <a href="catalogue.html">Catalogue</a>
+  <a href="panier.html">Panier</a>
+  <a href="../index.html">← Retour au portfolio</a>
+</div>
+
+<main class="wrap">
+  <div class="section" style="padding-top:32px;">
+    <div class="eyebrow">CATALOGUE</div>
+    <h1 style="font-size:clamp(1.7rem,4vw,2.4rem); margin:0 0 6px;">Tous les produits</h1>
+    <p style="color:var(--ink-dim); margin:0 0 8px; max-width:56ch;">Abonnements IA et logiciels créatifs, activés après commande. Choisis une catégorie pour affiner ta recherche.</p>
+
+    <div class="chip-row" id="chipRow"></div>
+
+    <div class="product-grid" id="catalogGrid" style="margin-top:22px;"></div>
+    <p id="emptyState" style="display:none; color:var(--ink-dim); padding:40px 0; text-align:center;">Aucun produit dans cette catégorie pour le moment.</p>
+  </div>
+</main>
+
+<footer class="shop-footer">
+  <div class="wrap shop-footer-row">
+    <span>© 2026 Caleb Creative — Boutique</span>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+  </div>
+</footer>
+
+<script src="assets/products.js"></script>
+<script src="assets/cart.js"></script>
+<script src="assets/shop.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  let activeCat = params.get('cat') || 'tous';
+  if (!CALEB_SHOP_CATEGORIES.some(c => c.id === activeCat)) activeCat = 'tous';
+
+  const chipRow = document.getElementById('chipRow');
+  const grid = document.getElementById('catalogGrid');
+  const emptyState = document.getElementById('emptyState');
+
+  function renderChips(){
+    chipRow.innerHTML = CALEB_SHOP_CATEGORIES.map(c =>
+      `<button class="chip${c.id === activeCat ? ' active' : ''}" data-cat="${c.id}">${c.label}</button>`
+    ).join('');
+    chipRow.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCat = btn.dataset.cat;
+        const url = new URL(window.location);
+        if (activeCat === 'tous') url.searchParams.delete('cat');
+        else url.searchParams.set('cat', activeCat);
+        history.replaceState(null, '', url);
+        renderChips();
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid(){
+    const list = activeCat === 'tous'
+      ? CALEB_SHOP_PRODUCTS
+      : CALEB_SHOP_PRODUCTS.filter(p => p.category === activeCat);
+    renderProductGrid(grid, list);
+    emptyState.style.display = list.length ? 'none' : 'block';
+  }
+
+  renderChips();
+  renderGrid();
+</script>
+</body>
+</html>

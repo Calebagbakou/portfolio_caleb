@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produit — Boutique Caleb Creative</title>
+<link rel="stylesheet" href="assets/shop.css">
+</head>
+<body>
+
+<header class="shop-header">
+  <div class="shop-header-row">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <nav class="shop-nav">
+      <a href="index.html">Accueil</a>
+      <a href="catalogue.html">Catalogue</a>
+      <a href="catalogue.html?cat=ia">Intelligence artificielle</a>
+      <a href="catalogue.html?cat=logiciels">Logiciels créatifs</a>
+    </nav>
+    <div class="shop-actions">
+      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <button class="shop-icon-btn mobile-nav-btn" data-mobile-nav-open aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+        <span class="cart-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav">
+  <div class="mobile-nav-top">
+    <a href="index.html" class="shop-brand">
+      <span class="shop-brand-mark">CA</span>
+      <span class="shop-brand-text">Caleb Creative<span>Boutique</span></span>
+    </a>
+    <button class="mobile-nav-close" data-mobile-nav-close aria-label="Fermer le menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <a href="index.html">Accueil</a>
+  <a href="catalogue.html">Catalogue</a>
+  <a href="panier.html">Panier</a>
+  <a href="../index.html">← Retour au portfolio</a>
+</div>
+
+<main class="wrap" id="productMain">
+  <!-- rempli dynamiquement par le script -->
+</main>
+
+<div id="notFound" class="wrap" style="display:none; text-align:center; padding:80px 24px;">
+  <h1 style="font-size:1.6rem;">Produit introuvable</h1>
+  <p style="color:var(--ink-dim); margin-bottom:22px;">Ce produit n'existe pas ou a été retiré du catalogue.</p>
+  <a href="catalogue.html" class="btn btn-dark">Retour au catalogue</a>
+</div>
+
+<footer class="shop-footer">
+  <div class="wrap shop-footer-row">
+    <span>© 2026 Caleb Creative — Boutique</span>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+  </div>
+</footer>
+
+<script src="assets/products.js"></script>
+<script src="assets/cart.js"></script>
+<script src="assets/shop.js"></script>
+<script>
+  const productId = new URLSearchParams(window.location.search).get('id');
+  const product = shopFindProduct(productId);
+  const main = document.getElementById('productMain');
+
+  if (!product){
+    main.style.display = 'none';
+    document.getElementById('notFound').style.display = 'block';
+  } else {
+    document.title = product.name + ' — Boutique Caleb Creative';
+    let selectedPlanId = product.plans[0].id;
+    let qty = 1;
+
+    main.innerHTML = `
+      <div class="product-detail">
+        <div class="product-visual reveal" style="background:${product.gradient}">
+          <span class="product-visual-avatar">${product.avatar}</span>
+        </div>
+        <div class="product-info reveal">
+          <div class="eyebrow">${product.categoryLabel}</div>
+          <h1>${product.name}</h1>
+          <p class="desc">${product.description}</p>
+
+          <ul class="highlight-list">
+            ${product.highlights.map(h => `<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>${h}</li>`).join('')}
+          </ul>
+
+          <div class="plan-group">
+            <span class="plan-group-label">Formule</span>
+            <div class="plan-options" id="planOptions"></div>
+          </div>
+
+          <div class="qty-row">
+            <span class="plan-group-label" style="margin:0;">Quantité</span>
+            <div class="qty-stepper">
+              <button type="button" id="qtyMinus" aria-label="Diminuer">−</button>
+              <span id="qtyValue">1</span>
+              <button type="button" id="qtyPlus" aria-label="Augmenter">+</button>
+            </div>
+          </div>
+
+          <div class="product-cta-row">
+            <button class="btn btn-primary" id="addToCartBtn">
+              Ajouter au panier
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+            </button>
+            <a href="panier.html" class="btn btn-outline">Voir le panier</a>
+          </div>
+          <p class="product-note">Livraison numérique : les identifiants ou instructions d'activation te sont envoyés directement par Caleb après validation de la commande.</p>
+        </div>
+      </div>
+    `;
+
+    const planOptions = document.getElementById('planOptions');
+    function renderPlans(){
+      planOptions.innerHTML = product.plans.map(pl => `
+        <label class="plan-option${pl.id === selectedPlanId ? ' selected' : ''}" data-plan="${pl.id}">
+          <span class="label-wrap"><input type="radio" name="plan" value="${pl.id}" ${pl.id === selectedPlanId ? 'checked' : ''}>${pl.label}</span>
+          <span class="price">${shopFormatPrice(pl.price)}</span>
+        </label>
+      `).join('');
+      planOptions.querySelectorAll('.plan-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          selectedPlanId = opt.dataset.plan;
+          renderPlans();
+        });
+      });
+    }
+    renderPlans();
+
+    const qtyValue = document.getElementById('qtyValue');
+    document.getElementById('qtyMinus').addEventListener('click', () => {
+      qty = Math.max(1, qty - 1);
+      qtyValue.textContent = qty;
+    });
+    document.getElementById('qtyPlus').addEventListener('click', () => {
+      qty = Math.min(20, qty + 1);
+      qtyValue.textContent = qty;
+    });
+
+    document.getElementById('addToCartBtn').addEventListener('click', () => {
+      cartAdd(product.id, selectedPlanId, qty);
+      showToast(product.name + ' ajouté au panier');
+    });
+
+    initReveal();
+  }
+</script>
+</body>
+</html>
