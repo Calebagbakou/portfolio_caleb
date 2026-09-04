@@ -19,7 +19,7 @@
       <a href="catalogue.html">Catalogue</a>
     </nav>
     <div class="shop-actions">
-      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="portfolio-link" data-portfolio-link href="../index.html">← Portfolio</a>
       <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
         <span class="cart-badge" data-cart-count>0</span>
@@ -96,59 +96,93 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a data-whatsapp-link href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="../assets/site-config.js"></script>
 <script src="assets/products.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  const lines = cartDetails();
-  const checkoutFilled = document.getElementById('checkoutFilled');
-  const checkoutEmpty = document.getElementById('checkoutEmpty');
+shopReady().then(() => {
+    const lines = cartDetails();
+    const checkoutFilled = document.getElementById('checkoutFilled');
+    const checkoutEmpty = document.getElementById('checkoutEmpty');
 
-  if (!lines.length){
-    checkoutFilled.style.display = 'none';
-    checkoutEmpty.style.display = 'block';
-  } else {
-    document.getElementById('recapLines').innerHTML = lines.map(line => `
-      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
-    `).join('');
-    document.getElementById('recapTotal').textContent = shopFormatPrice(cartTotal());
+    if (!lines.length){
+      checkoutFilled.style.display = 'none';
+      checkoutEmpty.style.display = 'block';
+    } else {
+      document.getElementById('recapLines').innerHTML = lines.map(line => `
+        <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+      `).join('');
+      document.getElementById('recapTotal').textContent = shopFormatPrice(cartTotal());
 
-    document.querySelectorAll('.pay-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-        opt.querySelector('input').checked = true;
+      document.querySelectorAll('.pay-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          opt.querySelector('input').checked = true;
+        });
       });
-    });
 
-    document.getElementById('checkoutForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const fname = document.getElementById('fname').value.trim();
-      const fcontact = document.getElementById('fcontact').value.trim();
-      const femail = document.getElementById('femail').value.trim();
-      const fnote = document.getElementById('fnote').value.trim();
-      const pay = document.querySelector('input[name="pay"]:checked').value;
-      const payLabels = { mtn: 'Mobile Money — MTN', moov: 'Mobile Money — Moov', virement: 'Virement bancaire' };
+      document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const fname = document.getElementById('fname').value.trim();
+        const fcontact = document.getElementById('fcontact').value.trim();
+        const femail = document.getElementById('femail').value.trim();
+        const fnote = document.getElementById('fnote').value.trim();
+        const pay = document.querySelector('input[name="pay"]:checked').value;
+        const payLabels = { mtn: 'Mobile Money — MTN', moov: 'Mobile Money — Moov', virement: 'Virement bancaire' };
 
-      const ref = 'CC-' + Date.now().toString(36).toUpperCase();
-      const order = {
-        ref,
-        date: new Date().toISOString(),
-        customer: { name: fname, contact: fcontact, email: femail, note: fnote },
-        payMethod: payLabels[pay],
-        items: lines,
-        total: cartTotal(),
-      };
+        let ref = 'CC-' + Date.now().toString(36).toUpperCase();
+        let total = cartTotal();
 
-      try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order)); } catch (e) {}
-      cartClear();
-      window.location.href = 'confirmation.html';
-    });
-  }
+        // La commande est enregistrée côté serveur (base de données), avec des
+        // prix recalculés par l'API. Aucun paiement n'est confirmé ici : le
+        // statut reste « en attente » jusqu'à validation réelle du paiement.
+        if (CALEB_SHOP_SOURCE === 'api') {
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.dataset.label = submitBtn.textContent; submitBtn.textContent = 'Enregistrement…'; }
+          try {
+            const res = await window.CALEB.apiPost('/api/public/orders', {
+              customer: { name: fname, phone: fcontact, email: femail },
+              items: cartRead(),
+              paymentMethod: pay,
+              note: fnote,
+            });
+            ref = res.data.ref;
+            total = res.data.total;
+          } catch (err) {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.label || 'Valider la commande'; }
+            let box = document.getElementById('checkoutError');
+            if (!box) {
+              box = document.createElement('p');
+              box.id = 'checkoutError';
+              box.style.cssText = 'color:#F87171;font-size:14px;margin-top:10px;';
+              e.target.appendChild(box);
+            }
+            box.textContent = err.message || "L'enregistrement de la commande a échoué. Réessaie ou contacte-moi sur WhatsApp.";
+            return;
+          }
+        }
+
+        const order = {
+          ref,
+          date: new Date().toISOString(),
+          customer: { name: fname, contact: fcontact, email: femail, note: fnote },
+          payMethod: payLabels[pay],
+          items: lines,
+          total,
+        };
+
+        try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order)); } catch (e) {}
+        cartClear();
+        window.location.href = 'confirmation.html';
+      });
+    }
+});
 </script>
 </body>
 </html>

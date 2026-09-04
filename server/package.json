@@ -1,0 +1,37 @@
+{
+  "name": "caleb-creative-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API + admin backend for the Caleb Creative portfolio & shop",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node src/db/seed.js",
+    "create-admin": "node src/scripts/create-admin.js",
+    "test": "node tests/api.test.js && node tests/admin.test.js && node tests/frontend.test.js",
+    "test:api": "node tests/api.test.js",
+    "test:admin": "node tests/admin.test.js",
+    "test:frontend": "node tests/frontend.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^13.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  }
+}

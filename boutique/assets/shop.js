@@ -76,11 +76,12 @@ function productCardHTML(product){
   const priceLabel = product.plans.length > 1
     ? `<small>dès&nbsp;</small>${shopFormatPrice(Math.min(...product.plans.map(p => p.price || Infinity)) === Infinity ? 0 : Math.min(...product.plans.filter(p=>p.price>0).map(p=>p.price) ) || 0)}`
     : shopFormatPrice(firstPlan.price);
+  const image = typeof shopProductImage === 'function' ? shopProductImage(product) : '';
   return `
   <a class="product-card reveal product-card-link" href="produit.html?id=${product.id}">
-    <div class="product-thumb" style="background:${product.gradient}">
+    <div class="product-thumb" style="${image ? `background:url('${image}') center/cover no-repeat;` : `background:${product.gradient};`}">
       ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-      <span class="product-thumb-avatar">${product.avatar}</span>
+      ${image ? '' : `<span class="product-thumb-avatar">${product.avatar}</span>`}
     </div>
     <div class="product-body">
       <span class="product-cat">${product.categoryLabel}</span>

@@ -19,7 +19,7 @@
       <a href="catalogue.html">Catalogue</a>
     </nav>
     <div class="shop-actions">
-      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="portfolio-link" data-portfolio-link href="../index.html">← Portfolio</a>
       <a class="shop-icon-btn" href="panier.html" aria-label="Voir le panier">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
         <span class="cart-badge" data-cart-count>0</span>
@@ -66,44 +66,48 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a data-whatsapp-link href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="../assets/site-config.js"></script>
 <script src="assets/products.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  const WHATSAPP_NUMBER = '2290148135395'; // même numéro que le portfolio — modifiable ici si besoin
+shopReady().then(() => {
+    // Numéro administrable : Paramètres → Coordonnées → WhatsApp
+  const WHATSAPP_NUMBER = CALEB_SHOP_SETTINGS.whatsapp_number || '2290148135395';
 
-  let order = null;
-  try { order = JSON.parse(localStorage.getItem(LAST_ORDER_KEY)); } catch (e) {}
+    let order = null;
+    try { order = JSON.parse(localStorage.getItem(LAST_ORDER_KEY)); } catch (e) {}
 
-  const filled = document.getElementById('confirmFilled');
-  const empty = document.getElementById('confirmEmpty');
+    const filled = document.getElementById('confirmFilled');
+    const empty = document.getElementById('confirmEmpty');
 
-  if (!order || !order.ref){
-    empty.style.display = 'block';
-  } else {
-    filled.style.display = 'block';
-    document.getElementById('confirmName').textContent = order.customer.name || '';
-    document.getElementById('confirmRef').textContent = order.ref;
-    document.getElementById('confirmTotal').textContent = shopFormatPrice(order.total);
-    document.getElementById('confirmPay').textContent = order.payMethod;
-    document.getElementById('confirmLines').innerHTML = order.items.map(line => `
-      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
-    `).join('');
+    if (!order || !order.ref){
+      empty.style.display = 'block';
+    } else {
+      filled.style.display = 'block';
+      document.getElementById('confirmName').textContent = order.customer.name || '';
+      document.getElementById('confirmRef').textContent = order.ref;
+      document.getElementById('confirmTotal').textContent = shopFormatPrice(order.total);
+      document.getElementById('confirmPay').textContent = order.payMethod;
+      document.getElementById('confirmLines').innerHTML = order.items.map(line => `
+        <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+      `).join('');
 
-    const itemsText = order.items.map(line => `- ${line.name} (${line.planLabel}) x${line.qty} — ${shopFormatPrice(line.lineTotal)}`).join('%0A');
-    const message =
-      `Bonjour Caleb, je viens de passer une commande sur la boutique (réf. ${order.ref}).%0A%0A` +
-      `${itemsText}%0A%0A` +
-      `Total : ${shopFormatPrice(order.total)}%0A` +
-      `Paiement souhaité : ${order.payMethod}%0A` +
-      `Nom : ${order.customer.name}`;
+      const itemsText = order.items.map(line => `- ${line.name} (${line.planLabel}) x${line.qty} — ${shopFormatPrice(line.lineTotal)}`).join('%0A');
+      const message =
+        `Bonjour Caleb, je viens de passer une commande sur la boutique (réf. ${order.ref}).%0A%0A` +
+        `${itemsText}%0A%0A` +
+        `Total : ${shopFormatPrice(order.total)}%0A` +
+        `Paiement souhaité : ${order.payMethod}%0A` +
+        `Nom : ${order.customer.name}`;
 
-    document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-  }
+      document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    }
+});
 </script>
 </body>
 </html>

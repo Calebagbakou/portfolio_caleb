@@ -1,0 +1,34 @@
+# Déploiement en un clic sur Render (https://render.com)
+# Le disque persistant conserve la base SQLite ET les médias importés.
+services:
+  - type: web
+    name: caleb-creative-api
+    runtime: node
+    plan: starter          # « free » n'offre pas de disque persistant
+    region: frankfurt
+    buildCommand: cd server && npm ci
+    startCommand: node server/src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: DATABASE_FILE
+        value: /var/data/caleb.db
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: SERVE_STATIC_SITE
+        value: "true"
+      - key: ADMIN_EMAIL
+        sync: false        # à renseigner dans le tableau de bord Render
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false        # ex. https://calebagbakou.github.io
+    disk:
+      name: caleb-data
+      mountPath: /var/data
+      sizeGB: 5

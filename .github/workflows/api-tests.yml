@@ -1,0 +1,35 @@
+name: Tests API & administration
+
+on:
+  push:
+    branches: [ "main", "arena/**" ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer les dépendances
+        run: cd server && npm ci
+      - name: Démarrer le serveur
+        env:
+          JWT_SECRET: test-secret-pour-la-ci-0123456789
+          ADMIN_EMAIL: ci@test.local
+          ADMIN_PASSWORD: CiTestPassword2026!
+        run: |
+          cd server && node src/index.js &
+          for i in $(seq 1 30); do curl -sf http://localhost:4000/api/health && break; sleep 1; done
+      - name: Tests API
+        env:
+          TEST_EMAIL: ci@test.local
+          TEST_PASSWORD: CiTestPassword2026!
+        run: cd server && node tests/api.test.js
+      - name: Tests interface admin + frontend
+        env:
+          TEST_EMAIL: ci@test.local
+          TEST_PASSWORD: CiTestPassword2026!
+        run: cd server && node tests/admin.test.js && node tests/frontend.test.js

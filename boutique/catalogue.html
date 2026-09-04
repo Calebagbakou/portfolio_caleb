@@ -21,7 +21,7 @@
       <a href="catalogue.html?cat=logiciels">Logiciels créatifs</a>
     </nav>
     <div class="shop-actions">
-      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="portfolio-link" data-portfolio-link href="../index.html">← Portfolio</a>
       <button class="shop-icon-btn mobile-nav-btn" data-mobile-nav-open aria-label="Ouvrir le menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -46,7 +46,7 @@
   <a href="index.html">Accueil</a>
   <a href="catalogue.html">Catalogue</a>
   <a href="panier.html">Panier</a>
-  <a href="../index.html">← Retour au portfolio</a>
+  <a data-portfolio-link href="../index.html">← Retour au portfolio</a>
 </div>
 
 <main class="wrap">
@@ -65,49 +65,52 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a data-whatsapp-link href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="../assets/site-config.js"></script>
 <script src="assets/products.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  const params = new URLSearchParams(window.location.search);
-  let activeCat = params.get('cat') || 'tous';
-  if (!CALEB_SHOP_CATEGORIES.some(c => c.id === activeCat)) activeCat = 'tous';
+shopReady().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    let activeCat = params.get('cat') || 'tous';
+    if (!CALEB_SHOP_CATEGORIES.some(c => c.id === activeCat)) activeCat = 'tous';
 
-  const chipRow = document.getElementById('chipRow');
-  const grid = document.getElementById('catalogGrid');
-  const emptyState = document.getElementById('emptyState');
+    const chipRow = document.getElementById('chipRow');
+    const grid = document.getElementById('catalogGrid');
+    const emptyState = document.getElementById('emptyState');
 
-  function renderChips(){
-    chipRow.innerHTML = CALEB_SHOP_CATEGORIES.map(c =>
-      `<button class="chip${c.id === activeCat ? ' active' : ''}" data-cat="${c.id}">${c.label}</button>`
-    ).join('');
-    chipRow.querySelectorAll('.chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        activeCat = btn.dataset.cat;
-        const url = new URL(window.location);
-        if (activeCat === 'tous') url.searchParams.delete('cat');
-        else url.searchParams.set('cat', activeCat);
-        history.replaceState(null, '', url);
-        renderChips();
-        renderGrid();
+    function renderChips(){
+      chipRow.innerHTML = CALEB_SHOP_CATEGORIES.map(c =>
+        `<button class="chip${c.id === activeCat ? ' active' : ''}" data-cat="${c.id}">${c.label}</button>`
+      ).join('');
+      chipRow.querySelectorAll('.chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCat = btn.dataset.cat;
+          const url = new URL(window.location);
+          if (activeCat === 'tous') url.searchParams.delete('cat');
+          else url.searchParams.set('cat', activeCat);
+          history.replaceState(null, '', url);
+          renderChips();
+          renderGrid();
+        });
       });
-    });
-  }
+    }
 
-  function renderGrid(){
-    const list = activeCat === 'tous'
-      ? CALEB_SHOP_PRODUCTS
-      : CALEB_SHOP_PRODUCTS.filter(p => p.category === activeCat);
-    renderProductGrid(grid, list);
-    emptyState.style.display = list.length ? 'none' : 'block';
-  }
+    function renderGrid(){
+      const list = activeCat === 'tous'
+        ? CALEB_SHOP_PRODUCTS
+        : CALEB_SHOP_PRODUCTS.filter(p => p.category === activeCat);
+      renderProductGrid(grid, list);
+      emptyState.style.display = list.length ? 'none' : 'block';
+    }
 
-  renderChips();
-  renderGrid();
+    renderChips();
+    renderGrid();
+});
 </script>
 </body>
 </html>

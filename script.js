@@ -1,9 +1,16 @@
-  /* ---------- Lien vers la boutique (URL facilement modifiable) ---------- */
-  // Par défaut : la boutique vit dans le même dépôt, sous /boutique/.
-  // Si tu déploies la boutique séparément (sous-domaine ou autre repo),
-  // remplace simplement cette valeur par l'URL complète, ex. :
-  // const SHOP_URL = 'https://boutique.calebcreative.com/';
-  const SHOP_URL = './boutique/index.html';
+/* =========================================================================
+   PORTFOLIO — COMPORTEMENTS
+   -------------------------------------------------------------------------
+   Le contenu (textes, images, projets, statistiques…) est injecté avant
+   l'initialisation par assets/hydrate.js depuis l'API d'administration.
+   Ce fichier ne contient donc que des comportements, plus de contenu.
+   ========================================================================= */
+function initPortfolio(){
+  /* ---------- Lien vers la boutique ---------- */
+  // L'URL vient de l'administration (Paramètres → Boutique → « URL de la
+  // boutique »). La valeur ci-dessous n'est qu'un repli si l'API est
+  // injoignable (ex. site statique seul sur GitHub Pages).
+  const SHOP_URL = window.CALEB_SHOP_URL || './boutique/index.html';
   document.querySelectorAll('[data-shop-link]').forEach(link => {
     link.setAttribute('href', SHOP_URL);
   });
@@ -52,7 +59,9 @@
   /* ---------- Typewriter headline ---------- */
   const twEl = document.getElementById('tw');
   const BR = '\u0001', EM_S = '\u0002', EM_E = '\u0003';
-  const fullText = 'DES IDÉES BRUTES, DES RENDUS QUI ' + EM_S + 'CLAQUENT' + EM_E;
+  // Titre administrable : le texte entre *astérisques* est mis en évidence.
+  const rawTitle = window.CALEB_HERO_TITLE || 'DES IDÉES BRUTES, DES RENDUS QUI *CLAQUENT*';
+  const fullText = rawTitle.replace(/\*([^*]+)\*/g, (m, inner) => EM_S + inner + EM_E);
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function renderTyped(n){
@@ -239,7 +248,11 @@
     const card = allCards[lightboxIndex];
     const thumb = card.querySelector('.p-thumb');
     const videoUrl = card.dataset.video;
-    if (videoUrl){
+    if (videoUrl && card.dataset.videoFile){
+      // Vidéo hébergée par le backend (fichier importé depuis /admin)
+      lightboxThumb.style.background = '#000';
+      lightboxThumb.innerHTML = `<video src="${videoUrl}" controls autoplay playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000;"></video>`;
+    } else if (videoUrl){
       lightboxThumb.style.background = '#000';
       lightboxThumb.innerHTML = `<iframe src="${videoUrl}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute; inset:0;"></iframe>`;
     } else {
@@ -348,3 +361,12 @@
       card.addEventListener('mouseleave', () => { card.style.transform = ''; });
     });
   }
+}
+
+/* Démarrage : on attend l'hydratation (contenu venant de l'API) pour que les
+   animations, la lightbox et les compteurs s'appliquent au contenu réel. */
+if (window.CalebHydrate && window.CalebHydrate.ready && typeof window.CalebHydrate.ready.then === 'function'){
+  window.CalebHydrate.ready.then(initPortfolio).catch(initPortfolio);
+} else {
+  initPortfolio();
+}
