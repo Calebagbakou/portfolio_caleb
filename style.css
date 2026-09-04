@@ -600,3 +600,32 @@
     .nav-overlay{ padding:64px 96px; }
     .nav-links a{ font-size:2.6rem; }
   }
+/* ================= TÉMOIGNAGES (contenu venant de l'administration) ================= */
+.testimonial-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px;
+  margin-top:22px;
+}
+.testimonial-card{
+  background:var(--panel);
+  border:1px solid var(--panel-line);
+  border-radius:16px;
+  padding:18px;
+}
+.testimonial-card p{
+  color:var(--paper-dim);
+  margin:0 0 12px;
+  font-size:15px;
+  line-height:1.6;
+}
+.testimonial-card .who{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  font-size:13px;
+}
+.testimonial-card .who span{
+  color:var(--paper-faint);
+  font-size:12px;
+}

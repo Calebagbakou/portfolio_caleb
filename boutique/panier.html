@@ -21,7 +21,7 @@
       <a href="catalogue.html?cat=logiciels">Logiciels créatifs</a>
     </nav>
     <div class="shop-actions">
-      <a class="portfolio-link" href="../index.html">← Portfolio</a>
+      <a class="portfolio-link" data-portfolio-link href="../index.html">← Portfolio</a>
       <button class="shop-icon-btn mobile-nav-btn" data-mobile-nav-open aria-label="Ouvrir le menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -46,7 +46,7 @@
   <a href="index.html">Accueil</a>
   <a href="catalogue.html">Catalogue</a>
   <a href="panier.html">Panier</a>
-  <a href="../index.html">← Retour au portfolio</a>
+  <a data-portfolio-link href="../index.html">← Retour au portfolio</a>
 </div>
 
 <main class="wrap">
@@ -81,68 +81,71 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a data-whatsapp-link href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="../assets/site-config.js"></script>
 <script src="assets/products.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  const cartFilled = document.getElementById('cartFilled');
-  const cartEmpty = document.getElementById('cartEmpty');
-  const cartLines = document.getElementById('cartLines');
-  const checkoutBtn = document.getElementById('checkoutBtn');
+shopReady().then(() => {
+    const cartFilled = document.getElementById('cartFilled');
+    const cartEmpty = document.getElementById('cartEmpty');
+    const cartLines = document.getElementById('cartLines');
+    const checkoutBtn = document.getElementById('checkoutBtn');
 
-  function renderCart(){
-    const lines = cartDetails();
-    if (!lines.length){
-      cartFilled.style.display = 'none';
-      cartEmpty.style.display = 'block';
-      return;
-    }
-    cartFilled.style.display = 'block';
-    cartEmpty.style.display = 'none';
+    function renderCart(){
+      const lines = cartDetails();
+      if (!lines.length){
+        cartFilled.style.display = 'none';
+        cartEmpty.style.display = 'block';
+        return;
+      }
+      cartFilled.style.display = 'block';
+      cartEmpty.style.display = 'none';
 
-    cartLines.innerHTML = lines.map(line => `
-      <div class="cart-line" data-product="${line.productId}" data-plan="${line.planId}">
-        <div class="cart-line-avatar" style="background:${line.gradient}"><span>${line.avatar}</span></div>
-        <div class="cart-line-info">
-          <div class="cart-line-name">${line.name}</div>
-          <div class="cart-line-plan">${line.planLabel} · ${shopFormatPrice(line.unitPrice)}</div>
+      cartLines.innerHTML = lines.map(line => `
+        <div class="cart-line" data-product="${line.productId}" data-plan="${line.planId}">
+          <div class="cart-line-avatar" style="background:${line.gradient}"><span>${line.avatar}</span></div>
+          <div class="cart-line-info">
+            <div class="cart-line-name">${line.name}</div>
+            <div class="cart-line-plan">${line.planLabel} · ${shopFormatPrice(line.unitPrice)}</div>
+          </div>
+          <div class="cart-line-qty">
+            <button type="button" data-action="minus">−</button>
+            <span>${line.qty}</span>
+            <button type="button" data-action="plus">+</button>
+          </div>
+          <div class="cart-line-price">${shopFormatPrice(line.lineTotal)}</div>
+          <button class="cart-line-remove" data-action="remove" aria-label="Retirer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
         </div>
-        <div class="cart-line-qty">
-          <button type="button" data-action="minus">−</button>
-          <span>${line.qty}</span>
-          <button type="button" data-action="plus">+</button>
-        </div>
-        <div class="cart-line-price">${shopFormatPrice(line.lineTotal)}</div>
-        <button class="cart-line-remove" data-action="remove" aria-label="Retirer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-      </div>
-    `).join('');
+      `).join('');
 
-    const total = cartTotal();
-    document.getElementById('sumSubtotal').textContent = shopFormatPrice(total);
-    document.getElementById('sumTotal').textContent = shopFormatPrice(total);
+      const total = cartTotal();
+      document.getElementById('sumSubtotal').textContent = shopFormatPrice(total);
+      document.getElementById('sumTotal').textContent = shopFormatPrice(total);
 
-    cartLines.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const lineEl = btn.closest('.cart-line');
-        const productId = lineEl.dataset.product;
-        const planId = lineEl.dataset.plan;
-        const current = cartRead().find(it => it.productId === productId && it.planId === planId);
-        if (!current) return;
-        if (btn.dataset.action === 'plus') cartUpdateQty(productId, planId, current.qty + 1);
-        if (btn.dataset.action === 'minus') cartUpdateQty(productId, planId, current.qty - 1);
-        if (btn.dataset.action === 'remove') cartRemove(productId, planId);
-        renderCart();
+      cartLines.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lineEl = btn.closest('.cart-line');
+          const productId = lineEl.dataset.product;
+          const planId = lineEl.dataset.plan;
+          const current = cartRead().find(it => it.productId === productId && it.planId === planId);
+          if (!current) return;
+          if (btn.dataset.action === 'plus') cartUpdateQty(productId, planId, current.qty + 1);
+          if (btn.dataset.action === 'minus') cartUpdateQty(productId, planId, current.qty - 1);
+          if (btn.dataset.action === 'remove') cartRemove(productId, planId);
+          renderCart();
+        });
       });
-    });
-  }
+    }
 
-  renderCart();
+    renderCart();
+});
 </script>
 </body>
 </html>

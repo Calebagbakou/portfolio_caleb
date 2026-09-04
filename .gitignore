@@ -1,0 +1,18 @@
+# Dépendances
+node_modules/
+
+# Secrets et variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Base de données locale et médias importés (jamais versionnés)
+server/data/
+server/uploads/
+*.db
+*.db-wal
+*.db-shm
+
+# Divers
+.DS_Store
+*.log
