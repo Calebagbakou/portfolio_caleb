@@ -238,7 +238,14 @@
     lightboxIndex = (index + allCards.length) % allCards.length;
     const card = allCards[lightboxIndex];
     const thumb = card.querySelector('.p-thumb');
-    lightboxThumb.style.background = thumb.style.background;
+    const videoUrl = card.dataset.video;
+    if (videoUrl){
+      lightboxThumb.style.background = '#000';
+      lightboxThumb.innerHTML = `<iframe src="${videoUrl}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute; inset:0;"></iframe>`;
+    } else {
+      lightboxThumb.style.background = thumb.style.background;
+      lightboxThumb.innerHTML = '';
+    }
     lightboxCat.textContent = card.querySelector('.p-cat').textContent;
     lightboxTitle.textContent = card.dataset.title || card.querySelector('.p-title').textContent;
     lightbox.classList.add('open');
@@ -246,6 +253,7 @@
   }
   function closeLightbox(){
     lightbox.classList.remove('open');
+    lightboxThumb.innerHTML = ''; // stoppe la lecture de la vidéo en coupant l'iframe
     document.body.style.overflow = '';
   }
   allCards.forEach((card, i) => {

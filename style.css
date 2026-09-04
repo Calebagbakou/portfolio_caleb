@@ -446,6 +446,15 @@
     font-family:'Poppins', monospace; font-size:11px; color:rgba(18,24,26,0.7);
     background:rgba(255,255,255,0.65); padding:4px 9px; border-radius:999px;
   }
+  .p-play{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0.92);
+    width:52px; height:52px; border-radius:50%;
+    background:rgba(255,255,255,0.92); color:#12181A;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0.9; transition: transform .3s cubic-bezier(.16,.8,.24,1), opacity .3s ease;
+  }
+  .p-card:hover .p-play{ transform:translate(-50%,-50%) scale(1.06); opacity:1; }
+  .p-play svg{ width:20px; height:20px; margin-left:2px; }
   .p-expand{
     position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:9px;
     background:rgba(15,20,22,0.55); backdrop-filter:blur(6px); color:#fff;
@@ -471,7 +480,7 @@
     transform: perspective(1000px) scale(.92) rotateX(4deg); transition: transform .4s cubic-bezier(.16,.8,.24,1);
   }
   .lightbox.open .lightbox-inner{ transform:perspective(1000px) scale(1) rotateX(0); }
-  .lightbox-thumb{ aspect-ratio:16/9; width:100%; }
+  .lightbox-thumb{ aspect-ratio:16/9; width:100%; position:relative; overflow:hidden; }
   .lightbox-body{ padding:20px 24px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
   .lightbox-cat{ font-family:'Poppins', monospace; font-size:11px; color:var(--teal); letter-spacing:0.04em; margin-bottom:6px; }
   .lightbox-title{ font-family:'Montserrat', sans-serif; font-weight:700; font-size:19px; color:var(--paper); margin:0; }
