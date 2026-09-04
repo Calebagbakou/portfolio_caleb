@@ -127,7 +127,7 @@
       planOptions.innerHTML = product.plans.map(pl => `
         <label class="plan-option${pl.id === selectedPlanId ? ' selected' : ''}" data-plan="${pl.id}">
           <span class="label-wrap"><input type="radio" name="plan" value="${pl.id}" ${pl.id === selectedPlanId ? 'checked' : ''}>${pl.label}</span>
-          <span class="price">${shopFormatPrice(pl.price)}</span>
+          <span class="price">${shopFormatPrice(pl.price)}${pl.priceEur ? `<small style="display:block; font-weight:500; color:var(--ink-faint); font-size:11px;">${pl.priceEur}</small>` : ''}</span>
         </label>
       `).join('');
       planOptions.querySelectorAll('.plan-option').forEach(opt => {
@@ -138,6 +138,7 @@
       });
     }
     renderPlans();
+
 
     const qtyValue = document.getElementById('qtyValue');
     document.getElementById('qtyMinus').addEventListener('click', () => {
