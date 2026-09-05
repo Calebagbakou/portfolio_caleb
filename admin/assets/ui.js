@@ -59,3 +59,22 @@ function setBtnLoading(btn, isLoading, loadingText = 'Chargement...'){
     btn.disabled = false;
   }
 }
+
+/**
+ * Menu tiroir mobile (hamburger) — partagé par toutes les pages admin.
+ * Nécessite dans le HTML : [data-admin-menu-open], .admin-sidebar, .admin-sidebar-backdrop
+ */
+function initAdminMobileNav(){
+  const btn = document.querySelector('[data-admin-menu-open]');
+  const sidebar = document.querySelector('.admin-sidebar');
+  const backdrop = document.querySelector('.admin-sidebar-backdrop');
+  if (!btn || !sidebar || !backdrop) return;
+
+  function open(){ sidebar.classList.add('open'); backdrop.classList.add('show'); }
+  function close(){ sidebar.classList.remove('open'); backdrop.classList.remove('show'); }
+
+  btn.addEventListener('click', open);
+  backdrop.addEventListener('click', close);
+  sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+}
+document.addEventListener('DOMContentLoaded', initAdminMobileNav);
