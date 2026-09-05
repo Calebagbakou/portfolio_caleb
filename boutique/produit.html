@@ -62,14 +62,21 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener" data-whatsapp-link>Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/site-settings.js"></script>
 <script src="assets/products.js"></script>
+<script src="assets/supabase-shop.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
+(async () => {
+  await loadShopProducts();
+
   const productId = new URLSearchParams(window.location.search).get('id');
   const product = shopFindProduct(productId);
   const main = document.getElementById('productMain');
@@ -85,15 +92,15 @@
     main.innerHTML = `
       <div class="product-detail">
         <div class="product-visual reveal" style="background:${product.gradient}">
-          <span class="product-visual-avatar">${product.avatar}</span>
+          <span class="product-visual-avatar">${escapeHtml(product.avatar)}</span>
         </div>
         <div class="product-info reveal">
-          <div class="eyebrow">${product.categoryLabel}</div>
-          <h1>${product.name}</h1>
-          <p class="desc">${product.description}</p>
+          <div class="eyebrow">${escapeHtml(product.categoryLabel)}</div>
+          <h1>${escapeHtml(product.name)}</h1>
+          <p class="desc">${escapeHtml(product.description)}</p>
 
           <ul class="highlight-list">
-            ${product.highlights.map(h => `<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>${h}</li>`).join('')}
+            ${product.highlights.map(h => `<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>${escapeHtml(h)}</li>`).join('')}
           </ul>
 
           <div class="plan-group">
@@ -125,9 +132,9 @@
     const planOptions = document.getElementById('planOptions');
     function renderPlans(){
       planOptions.innerHTML = product.plans.map(pl => `
-        <label class="plan-option${pl.id === selectedPlanId ? ' selected' : ''}" data-plan="${pl.id}">
-          <span class="label-wrap"><input type="radio" name="plan" value="${pl.id}" ${pl.id === selectedPlanId ? 'checked' : ''}>${pl.label}</span>
-          <span class="price">${shopFormatPrice(pl.price)}${pl.priceEur ? `<small style="display:block; font-weight:500; color:var(--ink-faint); font-size:11px;">${pl.priceEur}</small>` : ''}</span>
+        <label class="plan-option${pl.id === selectedPlanId ? ' selected' : ''}" data-plan="${escapeHtml(pl.id)}">
+          <span class="label-wrap"><input type="radio" name="plan" value="${escapeHtml(pl.id)}" ${pl.id === selectedPlanId ? 'checked' : ''}>${escapeHtml(pl.label)}</span>
+          <span class="price">${shopFormatPrice(pl.price)}${pl.priceEur ? `<small style="display:block; font-weight:500; color:var(--ink-faint); font-size:11px;">${escapeHtml(pl.priceEur)}</small>` : ''}</span>
         </label>
       `).join('');
       planOptions.querySelectorAll('.plan-option').forEach(opt => {
@@ -157,6 +164,7 @@
 
     initReveal();
   }
+})();
 </script>
 </body>
 </html>

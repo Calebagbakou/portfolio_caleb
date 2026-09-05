@@ -66,44 +66,93 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener" data-whatsapp-link>Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/site-settings.js"></script>
 <script src="assets/products.js"></script>
+<script src="assets/supabase-shop.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  const WHATSAPP_NUMBER = '2290148135395'; // même numéro que le portfolio — modifiable ici si besoin
-
-  let order = null;
-  try { order = JSON.parse(localStorage.getItem(LAST_ORDER_KEY)); } catch (e) {}
-
+(async () => {
   const filled = document.getElementById('confirmFilled');
   const empty = document.getElementById('confirmEmpty');
+  const orderId = new URLSearchParams(window.location.search).get('order');
 
-  if (!order || !order.ref){
-    empty.style.display = 'block';
-  } else {
-    filled.style.display = 'block';
-    document.getElementById('confirmName').textContent = order.customer.name || '';
-    document.getElementById('confirmRef').textContent = order.ref;
-    document.getElementById('confirmTotal').textContent = shopFormatPrice(order.total);
-    document.getElementById('confirmPay').textContent = order.payMethod;
-    document.getElementById('confirmLines').innerHTML = order.items.map(line => `
-      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
-    `).join('');
+  let order = null; // forme normalisée : { ref, customerName, total, payMethod, items:[{name,planLabel,qty,lineTotal}] }
 
-    const itemsText = order.items.map(line => `- ${line.name} (${line.planLabel}) x${line.qty} — ${shopFormatPrice(line.lineTotal)}`).join('%0A');
-    const message =
-      `Bonjour Caleb, je viens de passer une commande sur la boutique (réf. ${order.ref}).%0A%0A` +
-      `${itemsText}%0A%0A` +
-      `Total : ${shopFormatPrice(order.total)}%0A` +
-      `Paiement souhaité : ${order.payMethod}%0A` +
-      `Nom : ${order.customer.name}`;
-
-    document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  // Source principale : la vraie commande enregistrée dans Supabase,
+  // retrouvée par son id (uuid non devinable) — jamais par une simple
+  // valeur locale modifiable par le visiteur.
+  if (orderId){
+    const supabase = getShopSupabase();
+    if (supabase){
+      try {
+        const { data, error } = await supabase.rpc('get_order_confirmation', { p_order_id: orderId });
+        if (!error && data && data.length){
+          const row = data[0];
+          order = {
+            ref: row.ref,
+            customerName: row.customer_name || '',
+            total: row.total,
+            payMethod: row.payment_method,
+            items: (row.items || []).map(it => ({
+              name: it.product_name, planLabel: it.plan_label, qty: it.qty, lineTotal: it.line_total,
+            })),
+          };
+        }
+      } catch (e){
+        console.error('Lecture de la confirmation impossible :', e);
+      }
+    }
   }
+
+  // Repli UX uniquement (jamais la source de vérité) : dernière commande
+  // mémorisée localement, pour les anciens liens sans ?order= par ex.
+  if (!order){
+    try {
+      const legacy = JSON.parse(localStorage.getItem(LAST_ORDER_KEY));
+      if (legacy && legacy.ref){
+        order = {
+          ref: legacy.ref,
+          customerName: legacy.customer && legacy.customer.name,
+          total: legacy.total,
+          payMethod: legacy.payMethod,
+          items: legacy.items || [],
+        };
+      }
+    } catch (e){ /* rien à afficher */ }
+  }
+
+  if (!order){
+    empty.style.display = 'block';
+    return;
+  }
+
+  filled.style.display = 'block';
+  document.getElementById('confirmName').textContent = order.customerName || '';
+  document.getElementById('confirmRef').textContent = order.ref;
+  document.getElementById('confirmTotal').textContent = shopFormatPrice(order.total);
+  document.getElementById('confirmPay').textContent = order.payMethod || '—';
+  document.getElementById('confirmLines').innerHTML = order.items.map(line => `
+    <div class="summary-row"><span>${escapeHtml(line.name)} (${escapeHtml(line.planLabel)}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+  `).join('');
+
+  const whatsappNumber = (await getWhatsAppNumber()) || '2290148135395';
+  const itemsText = order.items.map(line => `- ${line.name} (${line.planLabel}) x${line.qty} — ${shopFormatPrice(line.lineTotal)}`).join('%0A');
+  const message =
+    `Bonjour Caleb, je viens de passer une commande sur la boutique (réf. ${order.ref}).%0A%0A` +
+    `${itemsText}%0A%0A` +
+    `Total : ${shopFormatPrice(order.total)}%0A` +
+    `Paiement souhaité : ${order.payMethod || ''}%0A` +
+    `Nom : ${order.customerName || ''}`;
+
+  document.getElementById('whatsappBtn').href = `https://wa.me/${whatsappNumber}?text=${message}`;
+})();
 </script>
 </body>
 </html>

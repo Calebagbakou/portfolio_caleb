@@ -40,22 +40,26 @@
       <div class="form-card">
         <h2 style="font-size:16px; margin:0 0 16px;">Tes informations</h2>
         <div class="form-row-2">
-          <div class="form-group">
+          <div class="form-group" id="fnameGroup">
             <label for="fname">Nom complet</label>
             <input type="text" id="fname" name="fname" placeholder="Ton nom" required>
+            <div class="field-error">Le nom est obligatoire.</div>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="fcontactGroup">
             <label for="fcontact">WhatsApp ou téléphone</label>
             <input type="tel" id="fcontact" name="fcontact" placeholder="+229 ..." required>
+            <div class="field-error">Numéro invalide (8 chiffres minimum).</div>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="femailGroup">
           <label for="femail">Email (optionnel)</label>
           <input type="email" id="femail" name="femail" placeholder="vous@exemple.com">
+          <div class="field-error">Format d'email invalide.</div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="fnoteGroup">
           <label for="fnote">Note pour la commande (optionnel)</label>
-          <textarea id="fnote" name="fnote" rows="3" placeholder="Précisions utiles pour l'activation…"></textarea>
+          <textarea id="fnote" name="fnote" rows="3" maxlength="500" placeholder="Précisions utiles pour l'activation…"></textarea>
+          <div class="field-error">500 caractères maximum.</div>
         </div>
 
         <h2 style="font-size:16px; margin:22px 0 14px;">Méthode de paiement</h2>
@@ -96,14 +100,21 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener" data-whatsapp-link>Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/site-settings.js"></script>
 <script src="assets/products.js"></script>
+<script src="assets/supabase-shop.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
+(async () => {
+  await loadShopProducts();
+
   const lines = cartDetails();
   const checkoutFilled = document.getElementById('checkoutFilled');
   const checkoutEmpty = document.getElementById('checkoutEmpty');
@@ -111,44 +122,95 @@
   if (!lines.length){
     checkoutFilled.style.display = 'none';
     checkoutEmpty.style.display = 'block';
-  } else {
-    document.getElementById('recapLines').innerHTML = lines.map(line => `
-      <div class="summary-row"><span>${line.name} (${line.planLabel}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
-    `).join('');
-    document.getElementById('recapTotal').textContent = shopFormatPrice(cartTotal());
-
-    document.querySelectorAll('.pay-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-        opt.querySelector('input').checked = true;
-      });
-    });
-
-    document.getElementById('checkoutForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const fname = document.getElementById('fname').value.trim();
-      const fcontact = document.getElementById('fcontact').value.trim();
-      const femail = document.getElementById('femail').value.trim();
-      const fnote = document.getElementById('fnote').value.trim();
-      const pay = document.querySelector('input[name="pay"]:checked').value;
-      const payLabels = { mtn: 'Mobile Money — MTN', moov: 'Mobile Money — Moov', virement: 'Virement bancaire' };
-
-      const ref = 'CC-' + Date.now().toString(36).toUpperCase();
-      const order = {
-        ref,
-        date: new Date().toISOString(),
-        customer: { name: fname, contact: fcontact, email: femail, note: fnote },
-        payMethod: payLabels[pay],
-        items: lines,
-        total: cartTotal(),
-      };
-
-      try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order)); } catch (e) {}
-      cartClear();
-      window.location.href = 'confirmation.html';
-    });
+    return;
   }
+
+  document.getElementById('recapLines').innerHTML = lines.map(line => `
+    <div class="summary-row"><span>${escapeHtml(line.name)} (${escapeHtml(line.planLabel)}) ×${line.qty}</span><span>${shopFormatPrice(line.lineTotal)}</span></div>
+  `).join('');
+  document.getElementById('recapTotal').textContent = shopFormatPrice(cartTotal());
+
+  document.querySelectorAll('.pay-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      opt.querySelector('input').checked = true;
+    });
+  });
+
+  function setFieldValid(groupId, valid){
+    document.getElementById(groupId).classList.toggle('invalid', !valid);
+  }
+
+  function validateForm(fname, fcontact, femail, fnote){
+    let ok = true;
+    if (!fname){ setFieldValid('fnameGroup', false); ok = false; } else setFieldValid('fnameGroup', true);
+    if (!isValidPhone(fcontact)){ setFieldValid('fcontactGroup', false); ok = false; } else setFieldValid('fcontactGroup', true);
+    if (femail && !isValidEmail(femail)){ setFieldValid('femailGroup', false); ok = false; } else setFieldValid('femailGroup', true);
+    if (fnote.length > 500){ setFieldValid('fnoteGroup', false); ok = false; } else setFieldValid('fnoteGroup', true);
+    return ok;
+  }
+
+  document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    const fname = document.getElementById('fname').value.trim();
+    const fcontact = document.getElementById('fcontact').value.trim();
+    const femail = document.getElementById('femail').value.trim();
+    const fnote = document.getElementById('fnote').value.trim();
+    const pay = document.querySelector('input[name="pay"]:checked').value;
+    const payLabels = { mtn: 'Mobile Money — MTN', moov: 'Mobile Money — Moov', virement: 'Virement bancaire' };
+
+    if (!validateForm(fname, fcontact, femail, fnote)){
+      showToast('Vérifie les champs en rouge avant de continuer.', 'error');
+      return;
+    }
+
+    // Re-vérifie que le panier n'a pas changé/vidé entre-temps (autre onglet, etc.)
+    const currentLines = cartDetails();
+    if (!currentLines.length){
+      showToast('Ton panier est vide.', 'error');
+      return;
+    }
+
+    const supabase = getShopSupabase();
+    if (!supabase){
+      showToast("Connexion au serveur indisponible. Réessaie dans un instant.", 'error');
+      return;
+    }
+
+    setBtnLoading(submitBtn, true, 'Enregistrement...');
+
+    try {
+      // 1) Client : retrouvé ou créé côté serveur (jamais de lecture directe de la table)
+      const { data: customerId, error: custErr } = await supabase.rpc('find_or_create_customer', {
+        p_name: fname, p_contact: fcontact, p_email: femail || null,
+      });
+      if (custErr) throw custErr;
+
+      // 2) Commande + lignes : le client n'envoie que plan_id + quantité,
+      //    jamais de prix — la base recalcule tout (voir migration 004/005).
+      const itemsPayload = currentLines.map(line => ({ plan_id: line.planDbId, qty: line.qty }));
+      const { data: orderRows, error: orderErr } = await supabase.rpc('create_order_with_items', {
+        p_customer_id: customerId,
+        p_payment_method: payLabels[pay],
+        p_note: fnote || null,
+        p_items: itemsPayload,
+      });
+      if (orderErr) throw orderErr;
+
+      const order = orderRows[0];
+      cartClear();
+      window.location.href = `confirmation.html?order=${encodeURIComponent(order.order_id)}`;
+
+    } catch (err){
+      console.error('Erreur création de commande :', err);
+      showToast("Impossible d'enregistrer la commande. Vérifie tes informations et réessaie.", 'error');
+      setBtnLoading(submitBtn, false);
+    }
+  });
+})();
 </script>
 </body>
 </html>

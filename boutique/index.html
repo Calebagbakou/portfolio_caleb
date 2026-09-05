@@ -103,15 +103,22 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener" data-whatsapp-link>Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/site-settings.js"></script>
 <script src="assets/products.js"></script>
+<script src="assets/supabase-shop.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
-  renderProductGrid(document.getElementById('featuredGrid'), CALEB_SHOP_PRODUCTS.slice(0, 3));
+  (async () => {
+    await loadShopProducts();
+    renderProductGrid(document.getElementById('featuredGrid'), window.CALEB_SHOP_PRODUCTS.slice(0, 3));
+  })();
 </script>
 </body>
 </html>

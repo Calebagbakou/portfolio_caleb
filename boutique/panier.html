@@ -81,18 +81,24 @@
 <footer class="shop-footer">
   <div class="wrap shop-footer-row">
     <span>© 2026 Caleb Creative — Boutique</span>
-    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener">Besoin d'aide ? Écrire sur WhatsApp →</a>
+    <a href="https://wa.me/2290148135395" target="_blank" rel="noopener" data-whatsapp-link>Besoin d'aide ? Écrire sur WhatsApp →</a>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/site-settings.js"></script>
 <script src="assets/products.js"></script>
+<script src="assets/supabase-shop.js"></script>
 <script src="assets/cart.js"></script>
 <script src="assets/shop.js"></script>
 <script>
+(async () => {
+  await loadShopProducts();
+
   const cartFilled = document.getElementById('cartFilled');
   const cartEmpty = document.getElementById('cartEmpty');
   const cartLines = document.getElementById('cartLines');
-  const checkoutBtn = document.getElementById('checkoutBtn');
 
   function renderCart(){
     const lines = cartDetails();
@@ -105,11 +111,11 @@
     cartEmpty.style.display = 'none';
 
     cartLines.innerHTML = lines.map(line => `
-      <div class="cart-line" data-product="${line.productId}" data-plan="${line.planId}">
-        <div class="cart-line-avatar" style="background:${line.gradient}"><span>${line.avatar}</span></div>
+      <div class="cart-line" data-product="${escapeHtml(line.productId)}" data-plan="${escapeHtml(line.planId)}">
+        <div class="cart-line-avatar" style="background:${line.gradient}"><span>${escapeHtml(line.avatar)}</span></div>
         <div class="cart-line-info">
-          <div class="cart-line-name">${line.name}</div>
-          <div class="cart-line-plan">${line.planLabel} · ${shopFormatPrice(line.unitPrice)}</div>
+          <div class="cart-line-name">${escapeHtml(line.name)}</div>
+          <div class="cart-line-plan">${escapeHtml(line.planLabel)} · ${shopFormatPrice(line.unitPrice)}</div>
         </div>
         <div class="cart-line-qty">
           <button type="button" data-action="minus">−</button>
@@ -143,6 +149,7 @@
   }
 
   renderCart();
+})();
 </script>
 </body>
 </html>
