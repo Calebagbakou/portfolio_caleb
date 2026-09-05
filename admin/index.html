@@ -95,49 +95,5 @@
     cards[3].textContent = messages.count ?? '0';
   })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../supabase/supabase-config.js"></script>
-<script>
-const loginForm = document.getElementById("loginForm");
-const errorMessage = document.getElementById("errorMessage");
-
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    errorMessage.textContent = "";
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        errorMessage.textContent = "Email ou mot de passe incorrect.";
-        console.error(error);
-        return;
-    }
-
-    const user = data.user;
-
-    // Vérifier que l'utilisateur est bien dans la table admins
-    const { data: admin, error: adminError } = await supabaseClient
-        .from("admins")
-        .select("id, name")
-        .eq("id", user.id)
-        .single();
-
-    if (adminError || !admin) {
-        await supabaseClient.auth.signOut();
-        errorMessage.textContent = "Accès administrateur refusé.";
-        return;
-    }
-
-    // Connexion réussie
-    window.location.href = "dashboard.html";
-});
-</script>
 </body>
 </html>
