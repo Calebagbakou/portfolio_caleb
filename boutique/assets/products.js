@@ -1,15 +1,13 @@
 /* =========================================================================
    PRODUITS DE LA BOUTIQUE — CALEB CREATIVE
    -------------------------------------------------------------------------
-   Pour ajouter un produit : copie un bloc { ... } et modifie ses valeurs.
-   Pour ajouter une formule à un produit existant : ajoute une ligne dans
-   son tableau "plans".
-   Un prix à 0 affiche automatiquement "Prix sur demande" — remplace juste
-   le 0 par le tarif réel (en FCFA, sans espace ni symbole) quand il est
-   connu.
+   ⚠️ Depuis la connexion à Supabase (voir supabase-shop.js), ces tableaux
+   ne sont plus la source principale : ils servent uniquement de FALLBACK
+   si Supabase est injoignable (repli automatique, cf. loadShopProducts()).
+   Pour gérer les produits normalement, utilise /admin/products.html.
    ========================================================================= */
 
-const CALEB_SHOP_PRODUCTS = [
+const CALEB_SHOP_PRODUCTS_FALLBACK = [
   {
     id: "gemini-pro",
     name: "Gemini Pro",
@@ -70,12 +68,17 @@ const CALEB_SHOP_PRODUCTS = [
   },
 ];
 
-/* Liste des catégories affichées dans les filtres du catalogue */
-const CALEB_SHOP_CATEGORIES = [
+/* Liste des catégories affichées dans les filtres du catalogue (fallback) */
+const CALEB_SHOP_CATEGORIES_FALLBACK = [
   { id: "tous", label: "Tous les produits" },
   { id: "ia", label: "Intelligence artificielle" },
   { id: "logiciels", label: "Logiciels créatifs" },
 ];
+
+/* Sources actives — pointent sur le fallback tant que Supabase n'a pas
+   répondu ; loadShopProducts() (supabase-shop.js) les réécrit ensuite. */
+window.CALEB_SHOP_PRODUCTS = CALEB_SHOP_PRODUCTS_FALLBACK;
+window.CALEB_SHOP_CATEGORIES = CALEB_SHOP_CATEGORIES_FALLBACK;
 
 /* ---------- Fonctions utilitaires partagées ---------- */
 function shopFormatPrice(price) {
@@ -84,7 +87,7 @@ function shopFormatPrice(price) {
 }
 
 function shopFindProduct(id) {
-  return CALEB_SHOP_PRODUCTS.find((p) => p.id === id) || null;
+  return window.CALEB_SHOP_PRODUCTS.find((p) => p.id === id) || null;
 }
 
 function shopFindPlan(product, planId) {

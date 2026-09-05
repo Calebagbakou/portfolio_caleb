@@ -72,7 +72,9 @@ function cartDetails() {
       if (!plan) return null;
       return {
         productId: product.id,
+        productDbId: product.dbId || null, // uuid réel côté Supabase, nécessaire pour order_items
         planId: plan.id,
+        planDbId: plan.dbId || plan.id,
         name: product.name,
         planLabel: plan.label,
         avatar: product.avatar,

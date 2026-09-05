@@ -4,6 +4,20 @@
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------- Échappement HTML (anti-XSS) ---------- */
+/* À utiliser systématiquement autour de toute donnée venant de Supabase,
+   d'un formulaire, de localStorage ou de l'URL, avant de l'insérer dans du
+   HTML via innerHTML/template literal. */
+function escapeHtml(value){
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /* ---------- Menu mobile ---------- */
 function initMobileNav(){
   const openBtn = document.querySelector('[data-mobile-nav-open]');
@@ -54,20 +68,42 @@ function initReveal(root = document){
   targets.forEach(el => io.observe(el));
 }
 
-/* ---------- Toast de confirmation (ex: "Ajouté au panier") ---------- */
+/* ---------- Toast de confirmation / erreur ---------- */
 let toastTimer = null;
-function showToast(message){
+function showToast(message, type = 'success'){
   let toast = document.querySelector('.toast');
   if (!toast){
     toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"/></svg><span></span>';
     document.body.appendChild(toast);
   }
+  toast.innerHTML = type === 'error'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg><span></span>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"/></svg><span></span>';
   toast.querySelector('span').textContent = message;
-  toast.classList.add('show');
+  toast.className = 'toast show' + (type === 'error' ? ' error' : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+function setBtnLoading(btn, isLoading, loadingText = 'Chargement...'){
+  if (isLoading){
+    btn.dataset.originalText = btn.innerHTML;
+    btn.textContent = loadingText;
+    btn.disabled = true;
+  } else {
+    btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
+    btn.disabled = false;
+  }
+}
+
+/* ---------- Validation basique de formulaire (checkout) ---------- */
+function isValidPhone(value){
+  const digits = value.replace(/[^0-9]/g, '');
+  return digits.length >= 8;
+}
+function isValidEmail(value){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 /* ---------- Rendu d'une carte produit (utilisé sur l'accueil et le catalogue) ---------- */
@@ -77,15 +113,15 @@ function productCardHTML(product){
     ? `<small>dès&nbsp;</small>${shopFormatPrice(Math.min(...product.plans.map(p => p.price || Infinity)) === Infinity ? 0 : Math.min(...product.plans.filter(p=>p.price>0).map(p=>p.price) ) || 0)}`
     : shopFormatPrice(firstPlan.price);
   return `
-  <a class="product-card reveal product-card-link" href="produit.html?id=${product.id}">
+  <a class="product-card reveal product-card-link" href="produit.html?id=${encodeURIComponent(product.id)}">
     <div class="product-thumb" style="background:${product.gradient}">
-      ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-      <span class="product-thumb-avatar">${product.avatar}</span>
+      ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
+      <span class="product-thumb-avatar">${escapeHtml(product.avatar)}</span>
     </div>
     <div class="product-body">
-      <span class="product-cat">${product.categoryLabel}</span>
-      <h3 class="product-name">${product.name}</h3>
-      <p class="product-tagline">${product.tagline}</p>
+      <span class="product-cat">${escapeHtml(product.categoryLabel)}</span>
+      <h3 class="product-name">${escapeHtml(product.name)}</h3>
+      <p class="product-tagline">${escapeHtml(product.tagline)}</p>
       <div class="product-price-row">
         <span class="product-price">${priceLabel}</span>
       </div>
