@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projets — Admin Caleb Creative</title>
+<link rel="stylesheet" href="assets/admin.css">
+<style>
+  .project-row{ display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .project-row-thumb{ width:64px;height:44px; border-radius:8px; background:#000; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .project-row-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .project-row-info{ flex:1; min-width:0; }
+  .project-row-title{ font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .project-row-meta{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
+  .status-pill{ font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px; }
+  .status-pill.published{ background:rgba(74,222,128,0.15); color:var(--success); }
+  .status-pill.draft{ background:rgba(255,255,255,0.08); color:var(--ink-faint); }
+  .project-row-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .project-row-actions button{ font-size:12px; padding:7px 12px; border-radius:7px; border:1px solid var(--border-strong); background:transparent; color:var(--ink-dim); cursor:pointer; }
+  .project-row-actions button:hover{ background:var(--surface-alt); color:var(--ink); }
+  .yt-preview{ display:flex; gap:12px; align-items:center; margin-top:10px; padding:10px; border-radius:var(--radius-sm); background:var(--surface-alt); }
+  .yt-preview img{ width:88px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; }
+  .yt-preview span{ font-size:12.5px; color:var(--ink-dim); }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+  .checkbox-row input{ width:16px; height:16px; }
+</style>
+</head>
+<body>
+
+<div class="admin-shell">
+  <div class="admin-mobile-bar">
+    <button class="admin-menu-btn" data-admin-menu-open aria-label="Ouvrir le menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <span class="brand"><span class="brand-mark">CA</span>Admin</span>
+  </div>
+  <div class="admin-sidebar-backdrop"></div>
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <span class="admin-brand-mark">CA</span>
+      <span class="admin-brand-text">Admin</span>
+    </div>
+
+    <nav class="admin-nav">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </a>
+
+      <div class="admin-nav-label">Portfolio</div>
+      <a href="projects.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 13l5-4 4 3 5-5 4 3"/></svg>
+        Projets
+      </a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Services<span class="soon">bientôt</span></a>
+
+      <div class="admin-nav-label">Médias</div>
+      <a href="media.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Bibliothèque média
+      </a>
+
+      <div class="admin-nav-label">Boutique</div>
+      <a href="products.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.4a2 2 0 002 1.6h8.2a2 2 0 002-1.6L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>Produits</a>
+      <a href="orders.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Commandes</a>
+
+      <div class="admin-nav-label">Général</div>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l1.3-4A8 8 0 1112 20a8 8 0 01-4-1z"/></svg>Messages<span class="soon">bientôt</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg>Paramètres<span class="soon">bientôt</span></a>
+    </nav>
+
+    <button class="admin-logout" id="logoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Déconnexion
+    </button>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Projets</h1>
+      <span class="who" id="whoBox"></span>
+    </div>
+
+    <div class="panel">
+      <h2 id="formTitle">Nouveau projet</h2>
+      <p>Colle un lien YouTube sous n'importe quel format (watch, youtu.be, embed) — l'identifiant et la miniature sont détectés automatiquement.</p>
+
+      <form id="projectForm" style="margin-top:18px;">
+        <input type="hidden" id="projectId">
+
+        <div class="form-group">
+          <label for="title">Titre</label>
+          <input type="text" id="title" required>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="youtubeUrl">URL YouTube</label>
+          <input type="url" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+          <div class="field-hint">Formats acceptés : youtube.com/watch?v=..., youtu.be/..., ou un lien d'intégration.</div>
+          <div class="yt-preview" id="ytPreview" style="display:none;">
+            <img id="ytPreviewImg" src="" alt="Miniature YouTube">
+            <span>Vidéo détectée — identifiant : <strong id="ytPreviewId"></strong></span>
+          </div>
+        </div>
+
+        <div class="form-row-2" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label for="status">Statut</label>
+            <select id="status">
+              <option value="draft">Non publié (brouillon)</option>
+              <option value="published">Publié</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sortOrder">Ordre d'affichage</label>
+            <input type="number" id="sortOrder" value="0" step="1">
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="featured">
+          <label for="featured" style="margin:0;">Projet mis en avant</label>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn btn-primary" id="saveBtn">Enregistrer</button>
+          <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display:none;">Annuler la modification</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Tous les projets</h2>
+      <p id="projectCountLabel">Chargement…</p>
+      <div id="projectList"></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+  let supabase;
+  let projectsCache = [];
+
+  /**
+   * Extrait l'identifiant d'une vidéo YouTube depuis n'importe quel format
+   * d'URL courant (watch, youtu.be, embed, /v/).
+   */
+  function extractYouTubeId(url){
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/v\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+  }
+
+  function updateYtPreview(){
+    const url = document.getElementById('youtubeUrl').value.trim();
+    const id = extractYouTubeId(url);
+    const preview = document.getElementById('ytPreview');
+    if (id){
+      document.getElementById('ytPreviewImg').src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      document.getElementById('ytPreviewId').textContent = id;
+      preview.style.display = 'flex';
+    } else {
+      preview.style.display = 'none';
+    }
+    return id;
+  }
+  document.getElementById('youtubeUrl').addEventListener('input', updateYtPreview);
+
+  function slugify(text){
+    return text.toLowerCase().trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // enlève les accents
+      .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  function resetForm(){
+    document.getElementById('projectForm').reset();
+    document.getElementById('projectId').value = '';
+    document.getElementById('sortOrder').value = 0;
+    document.getElementById('ytPreview').style.display = 'none';
+    document.getElementById('formTitle').textContent = 'Nouveau projet';
+    document.getElementById('saveBtn').textContent = 'Enregistrer';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+  document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+  function projectRowHTML(p){
+    const thumb = p.youtube_id
+      ? `<img src="https://img.youtube.com/vi/${p.youtube_id}/default.jpg" alt="">`
+      : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8"><rect x="3" y="3" width="18" height="14" rx="2"/></svg>`;
+    return `
+      <div class="project-row" data-id="${p.id}">
+        <div class="project-row-thumb">${thumb}</div>
+        <div class="project-row-info">
+          <div class="project-row-title">${p.title}</div>
+          <div class="project-row-meta">
+            <span class="status-pill ${p.status}">${p.status === 'published' ? 'Publié' : 'Brouillon'}</span>
+            · ordre ${p.sort_order}${p.featured ? ' · mis en avant' : ''}
+          </div>
+        </div>
+        <div class="project-row-actions">
+          <button type="button" data-action="edit">Modifier</button>
+          <button type="button" data-action="delete">Supprimer</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadProjects(){
+    const { data, error } = await supabase.from('projects').select('*').order('sort_order', { ascending: true });
+    if (error){
+      adminToast('Erreur de chargement : ' + error.message, 'error');
+      return;
+    }
+    projectsCache = data;
+    document.getElementById('projectCountLabel').textContent = data.length + ' projet(s).';
+    document.getElementById('projectList').innerHTML = data.map(projectRowHTML).join('') || '<p style="color:var(--ink-faint);">Aucun projet pour le moment.</p>';
+  }
+
+  document.getElementById('projectList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.closest('.project-row').dataset.id;
+    const project = projectsCache.find(p => p.id === id);
+
+    if (btn.dataset.action === 'edit'){
+      document.getElementById('projectId').value = project.id;
+      document.getElementById('title').value = project.title || '';
+      document.getElementById('description').value = project.description || '';
+      document.getElementById('youtubeUrl').value = project.youtube_url || '';
+      document.getElementById('status').value = project.status || 'draft';
+      document.getElementById('sortOrder').value = project.sort_order || 0;
+      document.getElementById('featured').checked = !!project.featured;
+      updateYtPreview();
+      document.getElementById('formTitle').textContent = 'Modifier le projet';
+      document.getElementById('saveBtn').textContent = 'Mettre à jour';
+      document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (btn.dataset.action === 'delete'){
+      const ok = await adminConfirm(`Supprimer définitivement le projet « ${project.title} » ?`);
+      if (!ok) return;
+      setBtnLoading(btn, true, '...');
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      setBtnLoading(btn, false);
+      if (error){
+        adminToast('Erreur lors de la suppression : ' + error.message, 'error');
+        return;
+      }
+      adminToast('Projet supprimé.');
+      loadProjects();
+    }
+  });
+
+  document.getElementById('projectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveBtn');
+    setBtnLoading(btn, true, 'Enregistrement...');
+
+    try {
+      const id = document.getElementById('projectId').value;
+      const title = document.getElementById('title').value.trim();
+      const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+      const youtubeId = extractYouTubeId(youtubeUrl);
+
+      if (youtubeUrl && !youtubeId){
+        throw new Error("Ce lien YouTube n'a pas été reconnu — vérifie le format.");
+      }
+
+      const payload = {
+        title,
+        slug: slugify(title) + (id ? '' : '-' + Date.now().toString(36)),
+        description: document.getElementById('description').value.trim() || null,
+        youtube_url: youtubeUrl || null,
+        youtube_id: youtubeId,
+        status: document.getElementById('status').value,
+        sort_order: parseInt(document.getElementById('sortOrder').value, 10) || 0,
+        featured: document.getElementById('featured').checked,
+        updated_at: new Date().toISOString(),
+      };
+
+      let error;
+      if (id){
+        // en modification, on garde le slug existant (ne pas le régénérer)
+        delete payload.slug;
+        ({ error } = await supabase.from('projects').update(payload).eq('id', id));
+      } else {
+        ({ error } = await supabase.from('projects').insert(payload));
+      }
+      if (error) throw error;
+
+      adminToast(id ? 'Projet mis à jour.' : 'Projet créé.');
+      resetForm();
+      loadProjects();
+
+    } catch (err){
+      adminToast(err.message || 'Une erreur est survenue.', 'error');
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  });
+
+  (async () => {
+    const user = await requireAdminSession();
+    if (!user) return;
+    document.getElementById('whoBox').textContent = user.email;
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    supabase = getSupabase();
+    loadProjects();
+  })();
+</script>
+</body>
+</html>
